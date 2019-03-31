@@ -28,8 +28,11 @@ import (
 type Flock struct {
 	path string
 	m    sync.RWMutex
+	// filehandle
 	fh   *os.File
+	// is locked; Locked returns it
 	l    bool
+	// is read-locked; RLocked returns it
 	r    bool
 }
 
@@ -113,6 +116,7 @@ func tryCtx(ctx context.Context, fn func() (bool, error), retryDelay time.Durati
 	}
 }
 
+// set filehandle
 func (f *Flock) setFh() error {
 	// open a new os.File instance
 	// create it if it doesn't exist, and open the file read-only.

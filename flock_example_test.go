@@ -14,7 +14,17 @@ import (
 	"github.com/gofrs/flock"
 )
 
+// linux:
+// exec 3>/tmp/go-lock.lock
+// flock -e -w 10 --verbose 3
+// flock -u --verbose 3
+// exec 3>&-
+
 func ExampleFlock_Locked() {
+	out := os.Stdout
+	// os.Stdout = os.Stderr
+	defer func() { os.Stdout = out }()
+
 	f := flock.New(os.TempDir() + "/go-lock.lock")
 	f.TryLock() // unchecked errors here
 
@@ -28,6 +38,10 @@ func ExampleFlock_Locked() {
 }
 
 func ExampleFlock_TryLock() {
+	out := os.Stdout
+	os.Stdout = os.Stderr
+	defer func() { os.Stdout = out }()
+
 	// should probably put these in /var/lock
 	fileLock := flock.New(os.TempDir() + "/go-lock.lock")
 
@@ -46,13 +60,20 @@ func ExampleFlock_TryLock() {
 	}
 
 	fmt.Printf("path: %s; locked: %v\n", fileLock.Path(), fileLock.Locked())
+
+	// // Output:
 }
 
 func ExampleFlock_TryLockContext() {
+	out := os.Stdout
+	os.Stdout = os.Stderr
+	defer func() { os.Stdout = out }()
+
 	// should probably put these in /var/lock
 	fileLock := flock.New(os.TempDir() + "/go-lock.lock")
 
 	lockCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	// lockCtx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	locked, err := fileLock.TryLockContext(lockCtx, 678*time.Millisecond)
 
@@ -69,4 +90,6 @@ func ExampleFlock_TryLockContext() {
 	}
 
 	fmt.Printf("path: %s; locked: %v\n", fileLock.Path(), fileLock.Locked())
+
+	// // Output:
 }

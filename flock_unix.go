@@ -126,6 +126,7 @@ func (f *Flock) TryLock() (bool, error) {
 // The actual file lock is non-blocking. If we are unable to get the shared file
 // lock, the function will return false instead of waiting for the lock. If we
 // get the lock, we also set the *Flock instance as being share-locked.
+// EAGAIN EWOULDBLOCK -> false, nil
 func (f *Flock) TryRLock() (bool, error) {
 	return f.try(&f.r, syscall.LOCK_SH)
 }
